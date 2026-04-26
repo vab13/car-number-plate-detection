@@ -5,7 +5,7 @@ import re
 import numpy as np
 
 # ---------------------------
-# 🔧 CONFIG
+#CONFIG
 # ---------------------------
 model = YOLO("models/best.pt")
 reader = easyocr.Reader(['en'], gpu=False)
@@ -14,13 +14,13 @@ reader = easyocr.Reader(['en'], gpu=False)
 cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
-    print("❌ Cannot open camera")
+    print("Cannot open camera")
     exit()
 
-print("✅ Press 'q' to quit")
+print("Press 'q' to quit")
 
 # ---------------------------
-# 🎥 LIVE DETECTION
+# LIVE DETECTION
 # ---------------------------
 while True:
     ret, frame = cap.read()

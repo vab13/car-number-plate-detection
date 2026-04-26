@@ -6,7 +6,7 @@ import re
 import numpy as np
 
 # ---------------------------
-# 🔧 CONFIG
+# CONFIG
 # ---------------------------
 model = YOLO("models/best.pt")
 reader = easyocr.Reader(['en'], gpu=False)
@@ -19,7 +19,7 @@ os.makedirs(output_folder, exist_ok=True)
 os.makedirs(debug_folder, exist_ok=True)
 
 # ---------------------------
-# 🚀 PROCESS IMAGES
+# PROCESS IMAGES
 # ---------------------------
 for img_name in os.listdir(source_folder):
     img_path = os.path.join(source_folder, img_name)
@@ -33,7 +33,7 @@ for img_name in os.listdir(source_folder):
     for r in results:
         for box, conf in zip(r.boxes.xyxy, r.boxes.conf):
 
-            # ✅ 1. Confidence filter
+            # 1. Confidence filter
             if conf < 0.6:
                 continue
 
@@ -46,7 +46,7 @@ for img_name in os.listdir(source_folder):
                 continue
 
             # ---------------------------
-            # ✂️ Crop with padding
+            # Crop with padding
             # ---------------------------
             pad = 15
             crop = img[max(0, y1-pad):y2+pad, max(0, x1-pad):x2+pad]
@@ -56,18 +56,18 @@ for img_name in os.listdir(source_folder):
             cv2.imwrite(os.path.join(debug_folder, debug_name), crop)
 
             # ---------------------------
-            # 🔍 Resize
+            # Resize
             # ---------------------------
             crop = cv2.resize(crop, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
 
             # ---------------------------
-            # 🧠 Preprocessing
+            # Preprocessing
             # ---------------------------
             gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
             gray = cv2.equalizeHist(gray)
 
             # ---------------------------
-            # 🔤 EasyOCR
+            # EasyOCR
             # ---------------------------
             result = reader.readtext(gray)
 
@@ -77,7 +77,7 @@ for img_name in os.listdir(source_folder):
                 text = best[1]
 
             # ---------------------------
-            # 🧹 Clean text
+            # Clean text
             # ---------------------------
             text = re.sub('[^A-Z0-9]', '', text.upper())
 
@@ -88,16 +88,16 @@ for img_name in os.listdir(source_folder):
             text = text.replace("S", "5")
             text = text.replace("B", "8")
 
-            # ✅ 3. Fix starting issues (0L → DL)
+            # 3. Fix starting issues (0L → DL)
             if len(text) >= 2:
                 if text[0] == '0':
                     text = 'D' + text[1:]
 
-            # ✅ 4. Remove short garbage
+            # 4. Remove short garbage
             if len(text) < 6:
                 continue
 
-            # ✅ 5. Limit length (avoid long garbage)
+            # 5. Limit length (avoid long garbage)
             text = text[:10]
 
             # ---------------------------
@@ -112,15 +112,15 @@ for img_name in os.listdir(source_folder):
                 final_text = text 
 
             # ---------------------------
-            # 🖨️ Output
+            # Output
             # ---------------------------
             print(f"{img_name} → OCR: {text} | FINAL: {final_text}")
 
             # ---------------------------
-            # 💾 Save result
+            # Save result
             # ---------------------------
             save_name = f"{img_name}_{x1}_{y1}.jpg"
             save_path = os.path.join(output_folder, save_name)
             cv2.imwrite(save_path, crop)
 
-print("✅ EasyOCR completed")
+print("EasyOCR completed")

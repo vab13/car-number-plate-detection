@@ -6,7 +6,7 @@ import re
 import numpy as np
 
 # ---------------------------
-# 🔧 CONFIG
+#CONFIG
 # ---------------------------
 pytesseract.pytesseract.tesseract_cmd = r"D:\Tesseract-OCR\tesseract.exe"
 
@@ -20,7 +20,7 @@ os.makedirs(output_folder, exist_ok=True)
 os.makedirs(debug_folder, exist_ok=True)
 
 # ---------------------------
-# 🚀 PROCESS IMAGES
+# PROCESS IMAGES
 # ---------------------------
 for img_name in os.listdir(source_folder):
     img_path = os.path.join(source_folder, img_name)
@@ -34,18 +34,18 @@ for img_name in os.listdir(source_folder):
     for r in results:
         for box, conf in zip(r.boxes.xyxy, r.boxes.conf):
 
-            # ✅ Filter weak detections
+            # Filter weak detections
             if conf < 0.5:
                 continue
 
             x1, y1, x2, y2 = map(int, box)
 
             # ---------------------------
-            # ✂️ Crop plate
+            # Crop plate
             # ---------------------------
             crop = img[y1:y2, x1:x2]
 
-            # ✅ Save debug crop
+            # Save debug crop
             debug_name = f"{img_name}_{x1}_{y1}.jpg"
             cv2.imwrite(os.path.join(debug_folder, debug_name), crop)
 
@@ -55,12 +55,12 @@ for img_name in os.listdir(source_folder):
             crop = cv2.resize(crop, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
 
             # ---------------------------
-            # 🧠 Preprocessing
+            # Preprocessing
             # ---------------------------
             gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
             gray = cv2.bilateralFilter(gray, 11, 17, 17)
 
-            # ✅ Adaptive threshold (better than normal threshold)
+            # Adaptive threshold (better than normal threshold)
             gray = cv2.adaptiveThreshold(
                 gray, 255,
                 cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -68,16 +68,16 @@ for img_name in os.listdir(source_folder):
                 11, 2
             )
 
-            # ✅ Morphology (clean noise)
+            # Morphology (clean noise)
             kernel = np.ones((3, 3), np.uint8)
             gray = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
 
-            # ✅ Sharpen
+            # Sharpen
             sharp_kernel = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
             gray = cv2.filter2D(gray, -1, sharp_kernel)
 
             # ---------------------------
-            # 🔤 OCR
+            # OCR
             # ---------------------------
             text = pytesseract.image_to_string(
                 gray,
@@ -85,7 +85,7 @@ for img_name in os.listdir(source_folder):
             )
 
             # ---------------------------
-            # 🧹 Clean text
+            # Clean text
             # ---------------------------
             text = re.sub('[^A-Z0-9]', '', text)
 
@@ -108,15 +108,15 @@ for img_name in os.listdir(source_folder):
                 final_text = text  # keep useful OCR
 
             # ---------------------------
-            # 🖨️ Output
+            # Output
             # ---------------------------
             print(f"{img_name} → OCR: {text} | FINAL: {final_text}")
 
             # ---------------------------
-            # 💾 Save result
+            # Save result
             # ---------------------------
             save_name = f"{img_name}_{x1}_{y1}.jpg"
             save_path = os.path.join(output_folder, save_name)
             cv2.imwrite(save_path, crop)
 
-print("✅ OCR completed")
+print("OCR completed")
