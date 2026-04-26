@@ -1,4 +1,5 @@
 runs/
-results/
+results/*
+!results/demo/
 dataset/
 __pycache__/
